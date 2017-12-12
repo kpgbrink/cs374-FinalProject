@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Box2DX, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Box2DX.2.0.2.0\lib\net40\Box2DX.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -48,6 +51,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WriteableBitmapEx.Wpf, Version=1.5.0.0, Culture=neutral, PublicKeyToken=50375ca6144f1c69, processorArchitecture=MSIL">
+      <HintPath>..\packages\WriteableBitmapEx.1.5.1.0\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -85,6 +91,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
