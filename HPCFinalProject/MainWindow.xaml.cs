@@ -67,43 +67,6 @@ namespace HPCFinalProject
 
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            generationsTextBox.Text = "hi";
-
-            var result = await Task.Run(async () =>
-            {
-                await Task.Delay(4000);
-
-                var parallel = true;
-                if (parallel)
-                {
-                    foreach (var generationNumber in Enumerable.Range(1, 1000))
-                    {
-                        var resultsForThisGeneration = await Task.WhenAll(
-                            allMyCreatures.Select(i => Task.Run(() => Blah(i))));
-
-                        // Process generation results (non-parallel).
-                        foreach (var (distance, x) in resultsForThisGeneration)
-                        {
-                            Console.WriteLine(distance);
-                        }
-                    }
-                    var results = await Task.WhenAll(
-                        Enumerable.Range(1, 20).Select(i => Task.Run(() => BlahAsync(i))));
-
-                    var resultsPlinq = Enumerable.Range(1, 20).AsParallel().Select(i => Blah(i)).OrderBy(x => -x.Distance).ToArray();
-                }
-                else
-                {
-
-                }
-
-                return DateTime.Now.Second;
-            });
-            generationsTextBox.Text = $"result: {}";
-        }
-
         async Task<(int Distance, CreatureDefinition Thing2)> BlahAsync(
             int parameter)
         {
@@ -118,16 +81,13 @@ namespace HPCFinalProject
 
         }
 
+        /*
         (int Distance, CreatureDefinition) CalculateCreatureThing(
             CreatureDefinition parameter) {
             System.Threading.Thread.Sleep(2000);
             return (1, 2);
         }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
+        */
 
         private (World, IEnumerable<Drawing.Drawable>) BuildWorld(CreatureDefinition creatureDefinition)
         {
@@ -156,43 +116,74 @@ namespace HPCFinalProject
             // Add the ground shape to the ground body.
             groundBody.CreateShape(groundShapeDef);
 
-            // Add circle that falls
-            // Define the dynamic body. We set its position and call the body factory.
-            var bodyDef = new BodyDef();
-            bodyDef.Position.Set(100.0f, 20.0f);
-            var body = world.CreateBody(bodyDef);
-
-            // Define another box shape for our dynamic body.
-            var shapeDef = new CircleDef
-            {
-                Radius = 10.0f,
-
-                // Set the box density to be non-zero, so it will be dynamic.
-                Density = 1.0f,
-
-                // Override the default friction.
-                Friction = 0.3f,
-            };
-
-            // Add the shape to the body.
-            body.CreateShape(shapeDef);
-
-            // Now tell the dynamic body to compute it's mass properties base
-            // on its shape.
-            body.SetMassFromShapes();
-
-
             var drawables = creatureDefinition.AddToWorld(world).Concat( new[] {
                 new PolygonDrawable(groundBody, Colors.LimeGreen, groundShapeDef),
             }).ToArray();
-
          
             return (world, drawables);
         }
 
-        private void TextBox_TextChanged_1(object sender, TextChangedEventArgs e)
+        private void Start_Button_Click(object sender, RoutedEventArgs e)
+        {
+            // Get number of generation loops to do
+            Int32.TryParse(GenerationsInput.Text, out var generations);
+            Int32.TryParse(NumPerGenerationInput.Text, out var numPerGeneration);
+            Int32.TryParse(NumSurvivePerGenerationInput.Text, out var numSurvivePerGeneration);
+            Int32.TryParse(SimulationTimeInput.Text, out var simulationTime);
+            Console.Write("The ints are: " + generations + numPerGeneration + numSurvivePerGeneration);
+
+            // Run the generations
+
+
+            // set text on what results I got back
+            NumPerGenerationInput.Text = (numPerGeneration * numPerGeneration).ToString();
+            GenerationDepthText.Text = "huehue";
+            TimeToCalculateText.Text = "lots of time";
+        }
+
+        /*
+       private async void Button_Click(object sender, RoutedEventArgs e)
+       {
+           GenerationDepthText.Text = "hi";
+
+           var result = await Task.Run(async () =>
+           {
+               await Task.Delay(4000);
+
+               var parallel = true;
+               if (parallel)
+               {
+                   foreach (var generationNumber in Enumerable.Range(1, 1000))
+                   {
+                       var resultsForThisGeneration = await Task.WhenAll(
+                           allMyCreatures.Select(i => Task.Run(() => Blah(i))));
+
+                       // Process generation results (non-parallel).
+                       foreach (var (distance, x) in resultsForThisGeneration)
+                       {
+                           Console.WriteLine(distance);
+                       }
+                   }
+                   var results = await Task.WhenAll(
+                       Enumerable.Range(1, 20).Select(i => Task.Run(() => BlahAsync(i))));
+
+                   var resultsPlinq = Enumerable.Range(1, 20).AsParallel().Select(i => Blah(i)).OrderBy(x => -x.Distance).ToArray();
+               }
+               else
+               {
+
+               }
+
+               return DateTime.Now.Second;
+           });
+           generationsTextBox.Text = $"result: {}";
+       }*/
+
+        private void Reset_Button_Click(object sender, RoutedEventArgs e)
         {
 
         }
+
+     
     }
 }
