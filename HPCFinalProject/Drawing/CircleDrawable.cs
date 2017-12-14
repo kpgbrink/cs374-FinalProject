@@ -21,10 +21,15 @@ namespace HPCFinalProject.Drawing
             Radius = (float)circleDef.Radius;
         }
 
-        public override void Draw(WriteableBitmap wb)
+        public override void Draw(WriteableBitmap wb, float scale, float posX, float posY)
         {
-            var worldVec = Body.GetWorldPoint(new Vec2());
-            wb.FillEllipseCentered((int)worldVec.X, (int)worldVec.Y, (int)Radius, (int)Radius, Color);
+            var worldVec = Body.GetPosition();//Body.GetWorldPoint(new Vec2());
+            wb.FillEllipseCentered(
+                (int)((worldVec.X + posX) *scale), 
+                (int)((worldVec.Y + posY) *scale), 
+                (int)(Radius*scale), 
+                (int)(Radius*scale), 
+                Color);
         }
     }
 }

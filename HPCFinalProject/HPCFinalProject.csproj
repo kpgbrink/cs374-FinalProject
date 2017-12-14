@@ -73,6 +73,7 @@
     </Compile>
     <Compile Include="Creature\ConstraintDefinition.cs" />
     <Compile Include="Creature\CreatureDefinition.cs" />
+    <Compile Include="Drawing\Camera.cs" />
     <Compile Include="Drawing\CircleDrawable.cs" />
     <Compile Include="Drawing\Drawable.cs" />
     <Compile Include="Drawing\PolygonDrawable.cs" />

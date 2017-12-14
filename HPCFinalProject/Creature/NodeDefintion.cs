@@ -42,9 +42,9 @@ namespace HPCFinalProject.Creature
             var drawable = new CircleDrawable(
                 circleBody,
                 System.Windows.Media.Color.FromRgb(
-                    (byte)(Friction * 255),
+                    (byte)(Friction * 255.0f),
                     80,
-                    (byte)(Density * 255)),
+                    (byte)(Density * 255.0f)),
                 circleDef);
             circleBody.SetMassFromShapes();
 

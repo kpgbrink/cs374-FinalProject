@@ -20,12 +20,12 @@ namespace HPCFinalProject.Drawing
             PolygonDef = polygonDef;
         }
 
-        public override void Draw(WriteableBitmap wb)
+        public override void Draw(WriteableBitmap wb, float scale, float posX, float posY)
         {
             int[] asPoints(Vec2 v)
             {
                 var worldVec = Body.GetWorldPoint(v);
-                return new[] { (int)worldVec.X, (int)worldVec.Y, };
+                return new[] { (int)((worldVec.X+posX)*scale), (int)((worldVec.Y+posY)*scale), };
             }
             wb.FillPolygon(
                 PolygonDef.Vertices.SelectMany(asPoints).Concat(asPoints(PolygonDef.Vertices[0])).ToArray(),

@@ -30,7 +30,11 @@ namespace HPCFinalProject
         Stopwatch chronometer = Stopwatch.StartNew();
         World world;
         IEnumerable<Drawable> drawables;
+        IEnumerable<Body> nodeBodies;
         long lastElapsedMilli;
+        const float scale = 20;
+        int imageWidth = 1920;
+        int imageHeight = 1080;
 
         public MainWindow()
         {
@@ -39,11 +43,15 @@ namespace HPCFinalProject
 
         void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            wb = new WriteableBitmap(200, 200, 96, 96, PixelFormats.Bgr32, null);
+            wb = new WriteableBitmap(imageWidth, imageHeight, 96, 96, PixelFormats.Bgr32, null);
             image.Source = wb;
             // create new creature
             var creature = CreatureDefinition.CreateSeedCreature();
-            (world, drawables) = BuildWorld(creature);
+            for (var i = 0; i < 100; i++)
+            {
+                creature = creature.GetMutatedCreature();
+            }
+            (world, drawables, nodeBodies) = BuildWorld(creature);
             CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
@@ -60,11 +68,24 @@ namespace HPCFinalProject
             world.Step((ms - (float)lastElapsedMilli)/1000, 8, 1);
 
             lastElapsedMilli = ms;
+
+
+            float posX = 0;
+            float posY = 0;
+            // calculate center of all nodes
+            foreach (var nodeBody in nodeBodies)
+            {
+                var bodyPos = nodeBody.GetPosition();
+                posX += bodyPos.X;
+                posY += bodyPos.Y;
+            }
+            posX = posX / nodeBodies.Count() + imageWidth/(2*scale);
+            posY = posY / nodeBodies.Count() - imageHeight/(2*scale);
+
             foreach(var drawable in drawables)
             {
-                drawable.Draw(wb);
+                drawable.Draw(wb, scale, posX, -posY);
             }
-
         }
 
         async Task<(int Distance, CreatureDefinition Thing2)> BlahAsync(
@@ -89,7 +110,7 @@ namespace HPCFinalProject
         }
         */
 
-        private (World, IEnumerable<Drawing.Drawable>) BuildWorld(CreatureDefinition creatureDefinition)
+        private (World, IEnumerable<Drawing.Drawable>, IEnumerable<Body>) BuildWorld(CreatureDefinition creatureDefinition)
         {
             AABB worldAABB = new AABB();
             worldAABB.LowerBound.Set(-9999.0f, -100.0f);
@@ -116,11 +137,12 @@ namespace HPCFinalProject
             // Add the ground shape to the ground body.
             groundBody.CreateShape(groundShapeDef);
 
-            var drawables = creatureDefinition.AddToWorld(world).Concat( new[] {
+            var (drawables, nodeBodies) = creatureDefinition.AddToWorld(world);
+            drawables.Concat(new[] {
                 new PolygonDrawable(groundBody, Colors.LimeGreen, groundShapeDef),
             }).ToArray();
-         
-            return (world, drawables);
+
+            return (world, drawables, nodeBodies);
         }
 
         private void Start_Button_Click(object sender, RoutedEventArgs e)

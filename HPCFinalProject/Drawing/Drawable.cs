@@ -20,6 +20,6 @@ namespace HPCFinalProject.Drawing
             Color = color;
         }
 
-        public abstract void Draw(WriteableBitmap wb);
+        public abstract void Draw(WriteableBitmap wb, float scale, float posX, float posY);
     }
 }
