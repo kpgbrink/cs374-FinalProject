@@ -216,8 +216,8 @@ namespace HPCFinalProject.Creature
                     joints: newCreature.Joints.Select(joint =>
                     {
                         return joint.With(
-                            lengthDelta: joint.LengthDelta + random.NextFloat(-.1f, .1f).Inbetween(distanceAddMin, distanceAddMax),
-                            motorInterval: joint.MotorInterval + random.NextFloat(-.1f, .1f).Inbetween(distanceAddTimeMin, distanceAddTimeMax)
+                            lengthDelta: (joint.LengthDelta + random.NextFloat(-.1f, .1f)).Inbetween(distanceAddMin, distanceAddMax),
+                            motorInterval: (joint.MotorInterval + random.NextFloat(-.1f, .1f)).Inbetween(distanceAddTimeMin, distanceAddTimeMax)
                             );
                     }).ToImmutableArray());
             }

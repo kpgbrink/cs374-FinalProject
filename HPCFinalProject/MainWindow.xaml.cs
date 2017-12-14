@@ -32,7 +32,7 @@ namespace HPCFinalProject
         World world;
         IEnumerable<Drawable> drawables;
         IEnumerable<Body> nodeBodies;
-        readonly IList<CreatureDefinition> creatures = new List<CreatureDefinition>();
+        IImmutableList<CreatureDefinition> creatures = ImmutableList<CreatureDefinition>.Empty;
 
         long lastElapsedMilli;
         const float scale = 30;
@@ -92,6 +92,21 @@ namespace HPCFinalProject
             foreach (var drawable in drawables)
             {
                 drawable.Draw(wb, scale, -posX, -posY);
+            }
+
+            for (var i = 0; i < 20; i++)
+            {
+                var xScale = 20;
+                for (var negative = -1; negative < 2; negative += 2)
+                {
+                    wb.DrawLineAa(
+                        (int)((xScale*negative*i - posX) * scale),
+                        (int)((7 - posY) * scale),
+                        (int)((xScale*negative*i - posX) * scale),
+                        (int)((40 - posY) * scale),
+                        i == 0 ? Colors.Orange : Colors.Red,
+                        (int)(2 * scale));
+                }
             }
         }
 
@@ -190,23 +205,23 @@ namespace HPCFinalProject
                     // Kill the weak
                     while (creatures.Count > numSurvivePerGeneration)
                     {
-                        creatures.RemoveAt(creatures.Count - 1);
+                        creatures = creatures.RemoveAt(creatures.Count - 1);
                     }
                     // Seeding
                     if (creatures.Count == 0)
                     {
                         while (creatures.Count < numPerGeneration)
                         {
-                            creatures.Add(CreatureDefinition.CreateSeedCreature());
+                            creatures = creatures.Add(CreatureDefinition.CreateSeedCreature());
                         }
                     }
                     // make children
                     while (creatures.Count < numPerGeneration)
                     {
-
-                        foreach (var newCreature in creatures.ToArray().AsParallel().Select(parent => parent.GetMutatedCreature()))
+                        var maybeParallelMakeCreatures = beParallel ? creatures.ToArray().AsParallel() : creatures.ToArray().AsParallel().WithDegreeOfParallelism(1);
+                        foreach (var newCreature in maybeParallelMakeCreatures.Select(parent => parent.GetMutatedCreature()))
                         {
-                            creatures.Add(newCreature);
+                            creatures = creatures.Add(newCreature);
                             if (creatures.Count >= numPerGeneration)
                             {
                                 break;
@@ -236,13 +251,10 @@ namespace HPCFinalProject
                         return (Creature: creature, Distance: distanceTraveled);
                     }).OrderByDescending(result => result.Distance).ToArray();
                 });
-                creatures.Clear();
-                foreach (var (creature, distance) in results)
-                {
-                    creatures.Add(creature);
-                }
+                creatures = results.Select(r => r.Creature).ToImmutableList();
                 GenerationDepthText.Text = $"{int.Parse(GenerationDepthText.Text) + 1}";
-                ListBoxCreatures = creatures.ToImmutableArray();
+
+                ListBoxCreatures = creatures;
                 CreatureList.ItemsSource = results.Select((creatureInfo, index) => $"Creature {index}; Distance: {creatureInfo.Distance}").ToArray();
             }
 
@@ -255,44 +267,6 @@ namespace HPCFinalProject
             //GenerationDepthText.Text = "huehue";
             TimeToCalculateText.Text = $"{stopWatch.Elapsed.TotalSeconds}";
         }
-
-        /*
-       private async void Button_Click(object sender, RoutedEventArgs e)
-       {
-           GenerationDepthText.Text = "hi";
-
-           var result = await Task.Run(async () =>
-           {
-               await Task.Delay(4000);
-
-               var parallel = true;
-               if (parallel)
-               {
-                   foreach (var generationNumber in Enumerable.Range(1, 1000))
-                   {
-                       var resultsForThisGeneration = await Task.WhenAll(
-                           allMyCreatures.Select(i => Task.Run(() => Blah(i))));
-
-                       // Process generation results (non-parallel).
-                       foreach (var (distance, x) in resultsForThisGeneration)
-                       {
-                           Console.WriteLine(distance);
-                       }
-                   }
-                   var results = await Task.WhenAll(
-                       Enumerable.Range(1, 20).Select(i => Task.Run(() => BlahAsync(i))));
-
-                   var resultsPlinq = Enumerable.Range(1, 20).AsParallel().Select(i => Blah(i)).OrderBy(x => -x.Distance).ToArray();
-               }
-               else
-               {
-
-               }
-
-               return DateTime.Now.Second;
-           });
-           generationsTextBox.Text = $"result: {}";
-       }*/
 
         private void Reset_Button_Click(object sender, RoutedEventArgs e)
         {
