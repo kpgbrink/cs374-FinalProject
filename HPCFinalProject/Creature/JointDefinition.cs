@@ -12,8 +12,8 @@ namespace HPCFinalProject.Creature
         public int Node1Index { get; }
         public int Node2Index { get; }
         float Length { get; }
-        float LengthDelta { get; }
-        float MotorInterval { get; }
+        public float LengthDelta { get; }
+        public float MotorInterval { get; }
         //bool EnableMotor = false;
 
         public JointDefinition(int node1Index, int node2Index, float length, float lengthDelta, float motorInterval)

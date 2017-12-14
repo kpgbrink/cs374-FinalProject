@@ -199,6 +199,8 @@ namespace HPCFinalProject.Creature
                     }
                 }
             }
+
+
             // delete joints randomly
             {
                 var jointCount = newCreature.Joints.Count;
@@ -206,6 +208,18 @@ namespace HPCFinalProject.Creature
                     newCreature = newCreature.With(
                         joints: newCreature.Joints.RemoveAt(random.Next(0, jointCount)));
                 }
+            }
+
+            // modify joints
+            {
+                newCreature = newCreature.With(
+                    joints: newCreature.Joints.Select(joint =>
+                    {
+                        return joint.With(
+                            lengthDelta: joint.LengthDelta + random.NextFloat(-.1f, .1f).Inbetween(distanceAddMin, distanceAddMax),
+                            motorInterval: joint.MotorInterval + random.NextFloat(-.1f, .1f).Inbetween(distanceAddTimeMin, distanceAddTimeMax)
+                            );
+                    }).ToImmutableArray());
             }
 
             // add joints randomly
@@ -231,7 +245,6 @@ namespace HPCFinalProject.Creature
                                 joints: newCreature.Joints.Add(newJoint));
                         }
                     }
-                    
                 }
             }
 
