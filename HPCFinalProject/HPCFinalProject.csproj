@@ -71,7 +71,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Creature\ConstraintDefinition.cs" />
+    <Compile Include="Creature\JointDefinition.cs" />
     <Compile Include="Creature\CreatureDefinition.cs" />
     <Compile Include="Drawing\Camera.cs" />
     <Compile Include="Drawing\CircleDrawable.cs" />

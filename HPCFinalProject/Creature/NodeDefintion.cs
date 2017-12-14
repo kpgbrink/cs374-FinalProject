@@ -12,6 +12,7 @@ namespace HPCFinalProject.Creature
     /// size, pos, friction
     internal class NodeDefintion
     {
+        public Vec2 Pos => new Vec2(PosX, PosY);
         public float PosX { get; }
         public float PosY { get; }
         public float Radius { get; }
@@ -31,6 +32,7 @@ namespace HPCFinalProject.Creature
         {
             var circleBody = world.CreateBody(new BodyDef {
                 Position = new Vec2(PosX, PosY),
+                FixedRotation = true,
             });
             var circleDef = new CircleDef
             {

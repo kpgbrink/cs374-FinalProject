@@ -21,5 +21,9 @@ namespace HPCFinalProject.Drawing
         }
 
         public abstract void Draw(WriteableBitmap wb, float scale, float posX, float posY);
+
+        public virtual void Step(float dt)
+        {
+        }
     }
 }

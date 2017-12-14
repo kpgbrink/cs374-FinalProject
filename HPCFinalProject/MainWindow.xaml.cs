@@ -32,7 +32,8 @@ namespace HPCFinalProject
         IEnumerable<Drawable> drawables;
         IEnumerable<Body> nodeBodies;
         long lastElapsedMilli;
-        const float scale = 20;
+        const float scale = 30;
+        const float fixedDeltaTime = 1f / 60;
         int imageWidth = 1920;
         int imageHeight = 1080;
 
@@ -47,7 +48,7 @@ namespace HPCFinalProject
             image.Source = wb;
             // create new creature
             var creature = CreatureDefinition.CreateSeedCreature();
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 10; i++)
             {
                 creature = creature.GetMutatedCreature();
             }
@@ -65,7 +66,12 @@ namespace HPCFinalProject
             wb.Clear(Colors.Black);
             var ms = (long)chronometer.Elapsed.TotalMilliseconds;
 
-            world.Step((ms - (float)lastElapsedMilli)/1000, 8, 1);
+            var dt = fixedDeltaTime;//(ms - (float)lastElapsedMilli) / 1000;
+            world.Step(dt, 8, 1);
+            foreach (var drawable in drawables)
+            {
+                drawable.Step(dt);
+            }
 
             lastElapsedMilli = ms;
 
@@ -79,12 +85,12 @@ namespace HPCFinalProject
                 posX += bodyPos.X;
                 posY += bodyPos.Y;
             }
-            posX = posX / nodeBodies.Count() + imageWidth/(2*scale);
+            posX = posX / nodeBodies.Count() - imageWidth/(2*scale);
             posY = posY / nodeBodies.Count() - imageHeight/(2*scale);
 
             foreach(var drawable in drawables)
             {
-                drawable.Draw(wb, scale, posX, -posY);
+                drawable.Draw(wb, scale, -posX, -posY);
             }
         }
 
@@ -119,7 +125,7 @@ namespace HPCFinalProject
 
             // Define the ground body.
             var groundBodyDef = new BodyDef();
-            groundBodyDef.Position.Set(0.0f, 150.0f);
+            groundBodyDef.Position.Set(0.0f, 15.0f);
 
             // Call the body factory which  creates the ground box shape.
             // The body is also added to the world.
