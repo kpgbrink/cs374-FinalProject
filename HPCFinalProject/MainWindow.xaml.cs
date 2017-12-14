@@ -138,7 +138,7 @@ namespace HPCFinalProject
             groundBody.CreateShape(groundShapeDef);
 
             var (drawables, nodeBodies) = creatureDefinition.AddToWorld(world);
-            drawables.Concat(new[] {
+            drawables = drawables.Concat(new[] {
                 new PolygonDrawable(groundBody, Colors.LimeGreen, groundShapeDef),
             }).ToArray();
 

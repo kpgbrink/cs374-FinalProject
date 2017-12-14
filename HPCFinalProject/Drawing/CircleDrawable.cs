@@ -18,12 +18,12 @@ namespace HPCFinalProject.Drawing
         public CircleDrawable(Body body, System.Windows.Media.Color color, CircleDef circleDef) : base(body, color)
         {
             CircleDef = circleDef;
-            Radius = (float)circleDef.Radius;
+            Radius = circleDef.Radius;
         }
 
         public override void Draw(WriteableBitmap wb, float scale, float posX, float posY)
         {
-            var worldVec = Body.GetPosition();//Body.GetWorldPoint(new Vec2());
+            var worldVec = Body.GetWorldPoint(new Vec2());//Body.GetWorldPoint(new Vec2());
             wb.FillEllipseCentered(
                 (int)((worldVec.X + posX) *scale), 
                 (int)((worldVec.Y + posY) *scale), 
