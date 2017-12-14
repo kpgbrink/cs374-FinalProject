@@ -83,19 +83,13 @@ namespace HPCFinalProject
             lastElapsedMilli = ms;
 
 
-            float posX = 0;
-            float posY = 0;
-            // calculate center of all nodes
-            foreach (var nodeBody in nodeBodies)
-            {
-                var bodyPos = nodeBody.GetPosition();
-                posX += bodyPos.X;
-                posY += bodyPos.Y;
-            }
-            posX = posX / nodeBodies.Count() - imageWidth/(2*scale);
-            posY = posY / nodeBodies.Count() - imageHeight/(2*scale);
+            var (posX, posY) = CalculateDistance(nodeBodies);
 
-            foreach(var drawable in drawables)
+            // Center on screen
+            posX -= imageWidth / (2 * scale);
+            posY -= imageHeight / (2 * scale);
+
+            foreach (var drawable in drawables)
             {
                 drawable.Draw(wb, scale, -posX, -posY);
             }
@@ -158,6 +152,22 @@ namespace HPCFinalProject
             return (world, drawables, nodeBodies);
         }
 
+        private static (float X, float Y) CalculateDistance(IEnumerable<Body> bodies)
+        {
+            float posX = 0;
+            float posY = 0;
+            // calculate center of all nodes
+            foreach (var nodeBody in bodies)
+            {
+                var bodyPos = nodeBody.GetPosition();
+                posX += bodyPos.X;
+                posY += bodyPos.Y;
+            }
+            posX = posX / bodies.Count();
+            posY = posY / bodies.Count();
+            return (posX, posY);
+        }
+
         private async void Start_Button_Click(object sender, RoutedEventArgs e)
         {
             // Get number of generation loops to do
@@ -174,7 +184,8 @@ namespace HPCFinalProject
             // Run the generations
             for (var i = 0; i < generations; i++)
             {
-                await Task.Run(async () =>
+                var beParallel = ParallelCheckBox.IsChecked ?? false;
+                var results = await Task.Run(async () =>
                 {
                     // Kill the weak
                     while (creatures.Count > numSurvivePerGeneration)
@@ -192,19 +203,47 @@ namespace HPCFinalProject
                     // make children
                     while (creatures.Count < numPerGeneration)
                     {
-                        foreach (var creature in creatures.ToArray())
+
+                        foreach (var newCreature in creatures.ToArray().AsParallel().Select(parent => parent.GetMutatedCreature()))
                         {
-                            creatures.Add(creature.GetMutatedCreature());
+                            creatures.Add(newCreature);
                             if (creatures.Count >= numPerGeneration)
                             {
                                 break;
                             }
                         }
                     }
+                    // Run the distances
+                    var maybeParallelCreatures = beParallel ? creatures.AsParallel() : creatures.AsParallel().WithDegreeOfParallelism(1);
+                    return maybeParallelCreatures.Select(creature =>
+                    {
+                        var (world, drawables, bodies) = BuildWorld(creature);
+                       
+                        var ms = 0f;
+                        var totalDt = simulationTime;
+                        var startingXDistance = CalculateDistance(bodies).X;
+                        while (ms < totalDt)
+                        {
+                            var dt = fixedDeltaTime;//(ms - (float)lastElapsedMilli) / 1000;
+                            world.Step(dt, 8, 1);
+                            foreach (var drawable in drawables)
+                            {
+                                drawable.Step(dt);
+                            }
+                            ms += fixedDeltaTime;
+                        }
+                        var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance); 
+                        return (Creature: creature, Distance: distanceTraveled);
+                    }).OrderByDescending(result => result.Distance).ToArray();
                 });
+                creatures.Clear();
+                foreach (var (creature, distance) in results)
+                {
+                    creatures.Add(creature);
+                }
                 GenerationDepthText.Text = $"{int.Parse(GenerationDepthText.Text) + 1}";
                 ListBoxCreatures = creatures.ToImmutableArray();
-                CreatureList.ItemsSource = ListBoxCreatures.Select((creature, index) => $"Creature {index}").ToArray();
+                CreatureList.ItemsSource = results.Select((creatureInfo, index) => $"Creature {index}; Distance: {creatureInfo.Distance}").ToArray();
             }
 
 
@@ -268,6 +307,11 @@ namespace HPCFinalProject
 
             // Now somehow show it on the thing!
             (world, drawables, nodeBodies) = BuildWorld(creature);
+        }
+
+        private void SimulationTimeInput_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }
