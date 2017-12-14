@@ -18,6 +18,7 @@ using Box2DX.Collision;
 using Box2DX.Common;
 using HPCFinalProject.Drawing;
 using HPCFinalProject.Creature;
+using System.Collections.Immutable;
 
 namespace HPCFinalProject
 {
@@ -31,11 +32,15 @@ namespace HPCFinalProject
         World world;
         IEnumerable<Drawable> drawables;
         IEnumerable<Body> nodeBodies;
+        readonly IList<CreatureDefinition> creatures = new List<CreatureDefinition>();
+
         long lastElapsedMilli;
         const float scale = 30;
         const float fixedDeltaTime = 1f / 60;
         int imageWidth = 1920;
         int imageHeight = 1080;
+
+        IImmutableList<CreatureDefinition> ListBoxCreatures = ImmutableArray<CreatureDefinition>.Empty;
 
         public MainWindow()
         {
@@ -47,12 +52,11 @@ namespace HPCFinalProject
             wb = new WriteableBitmap(imageWidth, imageHeight, 96, 96, PixelFormats.Bgr32, null);
             image.Source = wb;
             // create new creature
-            var creature = CreatureDefinition.CreateSeedCreature();
-            for (var i = 0; i < 10; i++)
-            {
-                creature = creature.GetMutatedCreature();
-            }
-            (world, drawables, nodeBodies) = BuildWorld(creature);
+            //var creature = CreatureDefinition.CreateSeedCreature();
+            //for (var i = 0; i < 10; i++)
+            //{
+            //    creature = creature.GetMutatedCreature();
+            //}
             CompositionTarget.Rendering += CompositionTarget_Rendering;
         }
 
@@ -63,7 +67,10 @@ namespace HPCFinalProject
 
         void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            wb.Clear(Colors.Black);
+            wb.Clear(Colors.LightBlue);
+            if (world == null)
+                return;
+
             var ms = (long)chronometer.Elapsed.TotalMilliseconds;
 
             var dt = fixedDeltaTime;//(ms - (float)lastElapsedMilli) / 1000;
@@ -118,7 +125,7 @@ namespace HPCFinalProject
 
         private (World, IEnumerable<Drawing.Drawable>, IEnumerable<Body>) BuildWorld(CreatureDefinition creatureDefinition)
         {
-            AABB worldAABB = new AABB();
+            var worldAABB = new AABB();
             worldAABB.LowerBound.Set(-9999.0f, -100.0f);
             worldAABB.UpperBound.Set(9999.0f, 1000.0f);
             var world = new World(worldAABB, gravity: new Vec2(0.0f, 10.0f), doSleep: false);
@@ -151,7 +158,7 @@ namespace HPCFinalProject
             return (world, drawables, nodeBodies);
         }
 
-        private void Start_Button_Click(object sender, RoutedEventArgs e)
+        private async void Start_Button_Click(object sender, RoutedEventArgs e)
         {
             // Get number of generation loops to do
             Int32.TryParse(GenerationsInput.Text, out var generations);
@@ -160,13 +167,54 @@ namespace HPCFinalProject
             Int32.TryParse(SimulationTimeInput.Text, out var simulationTime);
             Console.Write("The ints are: " + generations + numPerGeneration + numSurvivePerGeneration);
 
-            // Run the generations
+            StartButton.IsEnabled = false;
 
+            var stopWatch = Stopwatch.StartNew();
+
+            // Run the generations
+            for (var i = 0; i < generations; i++)
+            {
+                await Task.Run(async () =>
+                {
+                    // Kill the weak
+                    while (creatures.Count > numSurvivePerGeneration)
+                    {
+                        creatures.RemoveAt(creatures.Count - 1);
+                    }
+                    // Seeding
+                    if (creatures.Count == 0)
+                    {
+                        while (creatures.Count < numPerGeneration)
+                        {
+                            creatures.Add(CreatureDefinition.CreateSeedCreature());
+                        }
+                    }
+                    // make children
+                    while (creatures.Count < numPerGeneration)
+                    {
+                        foreach (var creature in creatures.ToArray())
+                        {
+                            creatures.Add(creature.GetMutatedCreature());
+                            if (creatures.Count >= numPerGeneration)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                });
+                GenerationDepthText.Text = $"{int.Parse(GenerationDepthText.Text) + 1}";
+                ListBoxCreatures = creatures.ToImmutableArray();
+                CreatureList.ItemsSource = ListBoxCreatures.Select((creature, index) => $"Creature {index}").ToArray();
+            }
+
+
+
+            StartButton.IsEnabled = true;
 
             // set text on what results I got back
-            NumPerGenerationInput.Text = (numPerGeneration * numPerGeneration).ToString();
-            GenerationDepthText.Text = "huehue";
-            TimeToCalculateText.Text = "lots of time";
+           // NumPerGenerationInput.Text = (numPerGeneration * numPerGeneration).ToString();
+            //GenerationDepthText.Text = "huehue";
+            TimeToCalculateText.Text = $"{stopWatch.Elapsed.TotalSeconds}";
         }
 
         /*
@@ -212,6 +260,14 @@ namespace HPCFinalProject
 
         }
 
-     
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CreatureList.SelectedIndex < 0 || CreatureList.SelectedIndex >= ListBoxCreatures.Count)
+                return;
+            var creature = ListBoxCreatures[CreatureList.SelectedIndex];
+
+            // Now somehow show it on the thing!
+            (world, drawables, nodeBodies) = BuildWorld(creature);
+        }
     }
 }
