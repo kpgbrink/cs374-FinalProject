@@ -203,22 +203,27 @@ namespace HPCFinalProject
                 var results = await Task.Run(async () =>
                 {
                     // Kill the weak
-                    while (creatures.Count > numSurvivePerGeneration)
+                    if (creatures.Count > numSurvivePerGeneration)
                     {
-                        creatures = creatures.RemoveAt(creatures.Count - 1);
+                        creatures = creatures.RemoveRange(numSurvivePerGeneration, creatures.Count - numSurvivePerGeneration);
                     }
                     // Seeding
                     if (creatures.Count == 0)
                     {
-                        while (creatures.Count < numPerGeneration)
+                        creatures = creatures.AddRange(Enumerable.Range(0, numPerGeneration).Select(j =>
                         {
-                            creatures = creatures.Add(CreatureDefinition.CreateSeedCreature());
-                        }
+                            return CreatureDefinition.CreateSeedCreature();
+                        }));
                     }
+                    // Shortcut for respecting beParallel
+                    ParallelQuery<T> maybeParallel<T>(IEnumerable<T> enumerable) => (beParallel ? enumerable.AsParallel() : enumerable.AsParallel().WithDegreeOfParallelism(1));
                     // make children
                     while (creatures.Count < numPerGeneration)
                     {
-                        var maybeParallelMakeCreatures = beParallel ? creatures.ToArray().AsParallel() : creatures.ToArray().AsParallel().WithDegreeOfParallelism(1);
+                        // Ensure AsOrdered() because otherwise the fastest will win which might mean
+                        // the things which roll the die a certain way resulting in always getting
+                        // the same children somehow(?).
+                        var maybeParallelMakeCreatures = maybeParallel(creatures.ToArray()).AsOrdered();
                         foreach (var newCreature in maybeParallelMakeCreatures.Select(parent => parent.GetMutatedCreature()))
                         {
                             creatures = creatures.Add(newCreature);
@@ -229,8 +234,7 @@ namespace HPCFinalProject
                         }
                     }
                     // Run the distances
-                    var maybeParallelCreatures = beParallel ? creatures.AsParallel() : creatures.AsParallel().WithDegreeOfParallelism(1);
-                    return maybeParallelCreatures.Select(creature =>
+                    return maybeParallel(creatures).Select(creature =>
                     {
                         var (world, drawables, bodies) = BuildWorld(creature);
                        
@@ -246,6 +250,17 @@ namespace HPCFinalProject
                                 drawable.Step(dt);
                             }
                             ms += fixedDeltaTime;
+
+                            // Disallow creatures which get too big. Such creatures generally
+                            // "cheat" by having the joints stick way out and jump by being
+                            // flung out of the ground which they punch really hard. Reject
+                            // by setting distance to negative so user can see that it was bad.
+                            var xMin = bodies.Select(b => b.GetPosition().X).Min();
+                            var xMax = bodies.Select(b => b.GetPosition().X).Max();
+                            var yMin = bodies.Select(b => b.GetPosition().Y).Min();
+                            var yMax = bodies.Select(b => b.GetPosition().Y).Max();
+                            const float maxSize = 50;
+                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -50) return (creature, -1);
                         }
                         var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance); 
                         return (Creature: creature, Distance: distanceTraveled);
