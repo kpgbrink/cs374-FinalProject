@@ -135,6 +135,10 @@ namespace HPCFinalProject.Creature
             newCreature = newCreature.With(
                 nodes: Nodes.Select(node =>
                 {
+                    if (Random.NextFloat(0.0f, 1.0f) < 0.2f)
+                    {
+                        return node;
+                    }
                     for (var i = 0; i < 10; i++)
                     {
                         var newNode = new NodeDefintion(

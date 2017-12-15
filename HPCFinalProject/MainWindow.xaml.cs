@@ -239,6 +239,7 @@ namespace HPCFinalProject
                     {
                         if (creature.Distance.HasValue)
                         {
+                            creature.Distance *= .99f;
                             return creature;
                         }
                         var (world, drawables, bodies) = BuildWorld(creature.Creature);
@@ -265,7 +266,7 @@ namespace HPCFinalProject
                             var yMin = bodies.Select(b => b.GetPosition().Y).Min();
                             var yMax = bodies.Select(b => b.GetPosition().Y).Max();
                             const float maxSize = 50;
-                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -15) return (creature.Creature, Distance: (float?)-1);
+                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -20) return (creature.Creature, Distance: (float?)-1);
                         }
                         var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance);
                         return (creature.Creature, Distance: (float?)distanceTraveled);
