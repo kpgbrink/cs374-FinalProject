@@ -280,6 +280,7 @@ namespace HPCFinalProject
                 {
                     creatures = ImmutableList<(CreatureDefinition, float?)>.Empty;
                     ListBoxCreatures = ImmutableArray<(CreatureDefinition, float?)>.Empty;
+                    GenerationDepthText.Text = "0";
                     resetButtonClicked = false;
                     break;
                 }
