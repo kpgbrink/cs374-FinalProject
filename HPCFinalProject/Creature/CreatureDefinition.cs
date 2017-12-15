@@ -137,12 +137,13 @@ namespace HPCFinalProject.Creature
                     for (var i = 0; i < 10; i++)
                     {
                         var newNode = new NodeDefintion(
-                            posX: (node.PosX + Random.NextFloat(-width / 20, width / 20)).Inbetween(-width, width),
-                            posY: (node.PosY + Random.NextFloat(-height / 20, height / 20)).Inbetween(-height, height),
-                            radius: (node.Radius + Random.NextFloat(-.2f, .2f)).Inbetween(radiusMin, radiusMax),
+                            posX: (node.PosX + Random.NextFloat(-width / 10, width / 10)).Inbetween(-width, width),
+                            posY: (node.PosY + Random.NextFloat(-height / 10, height / 10)).Inbetween(-height, height),
+                            radius: (node.Radius + Random.NextFloat(-.4f, .4f)).Inbetween(radiusMin, radiusMax),
                             friction: (node.Friction + Random.NextFloat(-.2f, .2f)).Inbetween(frictionMin, frictionMax),
                             density: (node.Density + Random.NextFloat(-.2f, .2f)).Inbetween(densityMin, densityMax));
-                        if (NodesCollidingAllCheck(newNode, Nodes))
+                        // Exclude original node from collision check list so that the new node can be slightly displaced
+                        if (NodesCollidingAllCheck(newNode, Nodes.Remove(node)))
                         {
                             return newNode;
                         }
@@ -204,12 +205,17 @@ namespace HPCFinalProject.Creature
             }
 
 
+            var jointChance = 10.0f;
             // delete joints randomly
             {
-                var jointCount = newCreature.Joints.Count;
-                if (jointCount > 1 && Random.NextFloat(0.0f, 5.0f) < 1f) {
-                    newCreature = newCreature.With(
-                        joints: newCreature.Joints.RemoveAt(Random.Next(0, jointCount)));
+                for (var i = 0; i < 2; i++)
+                {
+                    var jointCount = newCreature.Joints.Count;
+                    if (jointCount > 1 && Random.NextFloat(0.0f, jointChance) < 1f)
+                    {
+                        newCreature = newCreature.With(
+                            joints: newCreature.Joints.RemoveAt(Random.Next(0, jointCount)));
+                    }
                 }
             }
 
@@ -228,24 +234,27 @@ namespace HPCFinalProject.Creature
             // add joints randomly
             {
                 var jointCount = newCreature.Joints.Count;
-                var nodeCount = newCreature.Nodes.Count;
-                if (jointCount < 30 && Random.NextFloat(0.0f, 5.0f) < 1f)
+                for (var i = 0; i < 2; i++)
                 {
-                    for (var i = 0; i < 10; i++)
+                    jointCount = newCreature.Joints.Count;
+                    var nodeCount = newCreature.Nodes.Count;
+                    if (jointCount < 30 && Random.NextFloat(0.0f, jointChance) < 1f)
                     {
                         var node1Index1 = Random.Next(0, nodeCount);
                         var node2Index1 = Random.Next(0, nodeCount);
                         if (node1Index1 != node2Index1 && !newCreature.Joints.Any(joint =>
                             (joint.Node1Index == node1Index1 && joint.Node2Index == node2Index1) ||
-                            (joint.Node2Index == node1Index1 && joint.Node1Index == node2Index1))) {
+                            (joint.Node2Index == node1Index1 && joint.Node1Index == node2Index1)))
+                        {
                             var newJoint = new JointDefinition(
-                                           node1Index: node1Index1,
-                                           node2Index: node2Index1,
-                                           length: 0,
-                                           lengthDelta: Random.NextFloat(distanceAddMin, distanceAddMax),
-                                           motorInterval: Random.NextFloat(distanceAddMin, distanceAddMax));
+                                            node1Index: node1Index1,
+                                            node2Index: node2Index1,
+                                            length: 0,
+                                            lengthDelta: Random.NextFloat(distanceAddMin, distanceAddMax),
+                                            motorInterval: Random.NextFloat(distanceAddMin, distanceAddMax));
                             newCreature = newCreature.With(
                                 joints: newCreature.Joints.Add(newJoint));
+
                         }
                     }
                 }
