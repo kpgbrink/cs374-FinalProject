@@ -97,7 +97,7 @@ namespace HPCFinalProject.Creature
                     Body1 = Body,
                     Body2 = Body2,
                     Length = Definition.Length + (IsMaxLength ? Definition.LengthDelta : 0),
-                    DampingRatio = 0.5f,
+                    DampingRatio = 0.9f,
                 });
             }
         }

@@ -39,6 +39,7 @@ namespace HPCFinalProject
         const float fixedDeltaTime = 1f / 60;
         int imageWidth = 1920;
         int imageHeight = 1080;
+        bool resetButtonClicked = false;
 
         IImmutableList<(CreatureDefinition Creature, float? Distance)> ListBoxCreatures = ImmutableArray<(CreatureDefinition, float?)>.Empty;
 
@@ -141,7 +142,7 @@ namespace HPCFinalProject
 
             // Define the ground body.
             var groundBodyDef = new BodyDef();
-            groundBodyDef.Position.Set(0.0f, 15.0f);
+            groundBodyDef.Position.Set(0.0f, 17.0f);
 
             // Call the body factory which  creates the ground box shape.
             // The body is also added to the world.
@@ -264,7 +265,7 @@ namespace HPCFinalProject
                             var yMin = bodies.Select(b => b.GetPosition().Y).Min();
                             var yMax = bodies.Select(b => b.GetPosition().Y).Max();
                             const float maxSize = 50;
-                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -30) return (creature.Creature, Distance: (float?)-1);
+                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -15) return (creature.Creature, Distance: (float?)-1);
                         }
                         var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance);
                         return (creature.Creature, Distance: (float?)distanceTraveled);
@@ -274,6 +275,14 @@ namespace HPCFinalProject
 
                 ListBoxCreatures = creatures;
                 CreatureList.ItemsSource = creatures.Select((creatureInfo, index) => $"Creature {index}; Distance: {creatureInfo.Distance}").ToArray();
+
+                if (resetButtonClicked)
+                {
+                    creatures = ImmutableList<(CreatureDefinition, float?)>.Empty;
+                    ListBoxCreatures = ImmutableArray<(CreatureDefinition, float?)>.Empty;
+                    resetButtonClicked = false;
+                    break;
+                }
             }
 
 
@@ -288,7 +297,7 @@ namespace HPCFinalProject
 
         private void Reset_Button_Click(object sender, RoutedEventArgs e)
         {
-
+            resetButtonClicked = true;
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

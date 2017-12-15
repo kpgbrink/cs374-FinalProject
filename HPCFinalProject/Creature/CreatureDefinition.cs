@@ -27,7 +27,7 @@ namespace HPCFinalProject.Creature
         internal const float distanceAddMin = 0.0f;
         internal const float distanceAddMax = 10f;
         internal const float distanceAddTimeMin = 0.0f;
-        internal const float distanceAddTimeMax = 10f;
+        internal const float distanceAddTimeMax = 2f;
 
 
         public CreatureDefinition(
@@ -131,6 +131,7 @@ namespace HPCFinalProject.Creature
 
 
             // Modify the nodes already on the creature
+            var change = 0.01f;
             newCreature = newCreature.With(
                 nodes: Nodes.Select(node =>
                 {
@@ -139,9 +140,9 @@ namespace HPCFinalProject.Creature
                         var newNode = new NodeDefintion(
                             posX: (node.PosX + Random.NextFloat(-width / 10, width / 10)).Inbetween(-width, width),
                             posY: (node.PosY + Random.NextFloat(-height / 10, height / 10)).Inbetween(-height, height),
-                            radius: (node.Radius + Random.NextFloat(-.4f, .4f)).Inbetween(radiusMin, radiusMax),
-                            friction: (node.Friction + Random.NextFloat(-.2f, .2f)).Inbetween(frictionMin, frictionMax),
-                            density: (node.Density + Random.NextFloat(-.2f, .2f)).Inbetween(densityMin, densityMax));
+                            radius: (node.Radius + Random.NextFloat(-change, change)).Inbetween(radiusMin, radiusMax),
+                            friction: (node.Friction + Random.NextFloat(-change, change)).Inbetween(frictionMin, frictionMax),
+                            density: (node.Density + Random.NextFloat(-change, change)).Inbetween(densityMin, densityMax));
                         // Exclude original node from collision check list so that the new node can be slightly displaced
                         if (NodesCollidingAllCheck(newNode, Nodes.Remove(node)))
                         {
@@ -157,12 +158,14 @@ namespace HPCFinalProject.Creature
                         density: node.Density + Random.NextFloat(-.2f, .2f).Inbetween(.01f, 1f));
                 }).ToImmutableList());
 
+
+            var nodeChance = 30.0f;
             // Delete nodes randomly
             {
                 var nodeCount = newCreature.Nodes.Count;
                 if (nodeCount > 1)
                 {
-                    if (Random.NextFloat(0.0f, 5.0f) < 1f)
+                    if (Random.NextFloat(0.0f, nodeChance/2) < 1f)
                     {
                         newCreature = newCreature.With(
                             nodes: newCreature.Nodes.RemoveAt(nodeCount - 1),
@@ -173,9 +176,9 @@ namespace HPCFinalProject.Creature
             }
 
             // Add nodes randomly
-            for (var i = 0; i < 2; i++)
+            for (var i = 0; i < 6; i++)
             {
-                if (Random.NextFloat(0.0f, 4.0f) < 1.0f)
+                if (Random.NextFloat(0.0f, nodeChance) < 1.0f)
                 {
                     var newNode = CreateNewNode(Nodes);
                     if (newNode != null)
@@ -205,7 +208,7 @@ namespace HPCFinalProject.Creature
             }
 
 
-            var jointChance = 10.0f;
+            var jointChance = 20.0f;
             // delete joints randomly
             {
                 for (var i = 0; i < 2; i++)
@@ -234,7 +237,7 @@ namespace HPCFinalProject.Creature
             // add joints randomly
             {
                 var jointCount = newCreature.Joints.Count;
-                for (var i = 0; i < 2; i++)
+                for (var i = 0; i < 5; i++)
                 {
                     jointCount = newCreature.Joints.Count;
                     var nodeCount = newCreature.Nodes.Count;
