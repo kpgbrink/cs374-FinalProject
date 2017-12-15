@@ -32,7 +32,7 @@ namespace HPCFinalProject
         World world;
         IEnumerable<Drawable> drawables;
         IEnumerable<Body> nodeBodies;
-        IImmutableList<CreatureDefinition> creatures = ImmutableList<CreatureDefinition>.Empty;
+        IImmutableList<(CreatureDefinition Creature, float? Distance)> creatures = ImmutableList<(CreatureDefinition, float?)>.Empty;
 
         long lastElapsedMilli;
         const float scale = 30;
@@ -40,7 +40,7 @@ namespace HPCFinalProject
         int imageWidth = 1920;
         int imageHeight = 1080;
 
-        IImmutableList<CreatureDefinition> ListBoxCreatures = ImmutableArray<CreatureDefinition>.Empty;
+        IImmutableList<(CreatureDefinition Creature, float? Distance)> ListBoxCreatures = ImmutableArray<(CreatureDefinition, float?)>.Empty;
 
         public MainWindow()
         {
@@ -200,7 +200,7 @@ namespace HPCFinalProject
             for (var i = 0; i < generations; i++)
             {
                 var beParallel = ParallelCheckBox.IsChecked ?? false;
-                var results = await Task.Run(async () =>
+                creatures = await Task.Run(async () =>
                 {
                     // Kill the weak
                     if (creatures.Count > numSurvivePerGeneration)
@@ -212,7 +212,7 @@ namespace HPCFinalProject
                     {
                         creatures = creatures.AddRange(Enumerable.Range(0, numPerGeneration).Select(j =>
                         {
-                            return CreatureDefinition.CreateSeedCreature();
+                            return (CreatureDefinition.CreateSeedCreature(), (float?)null);
                         }));
                     }
                     // Shortcut for respecting beParallel
@@ -224,7 +224,7 @@ namespace HPCFinalProject
                         // the things which roll the die a certain way resulting in always getting
                         // the same children somehow(?).
                         var maybeParallelMakeCreatures = maybeParallel(creatures.ToArray()).AsOrdered();
-                        foreach (var newCreature in maybeParallelMakeCreatures.Select(parent => parent.GetMutatedCreature()))
+                        foreach (var newCreature in maybeParallelMakeCreatures.Select(parent => (parent.Creature.GetMutatedCreature(), (float?)null) ))
                         {
                             creatures = creatures.Add(newCreature);
                             if (creatures.Count >= numPerGeneration)
@@ -236,7 +236,11 @@ namespace HPCFinalProject
                     // Run the distances
                     return maybeParallel(creatures).Select(creature =>
                     {
-                        var (world, drawables, bodies) = BuildWorld(creature);
+                        if (creature.Distance.HasValue)
+                        {
+                            return creature;
+                        }
+                        var (world, drawables, bodies) = BuildWorld(creature.Creature);
                        
                         var ms = 0f;
                         var totalDt = simulationTime;
@@ -260,17 +264,16 @@ namespace HPCFinalProject
                             var yMin = bodies.Select(b => b.GetPosition().Y).Min();
                             var yMax = bodies.Select(b => b.GetPosition().Y).Max();
                             const float maxSize = 50;
-                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -50) return (creature, -1);
+                            if (xMax - xMin > maxSize || yMax - yMin > maxSize || yMin < -30) return (creature.Creature, Distance: (float?)-1);
                         }
-                        var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance); 
-                        return (Creature: creature, Distance: distanceTraveled);
-                    }).OrderByDescending(result => result.Distance).ToArray();
+                        var distanceTraveled = System.Math.Abs(CalculateDistance(bodies).X - startingXDistance);
+                        return (creature.Creature, Distance: (float?)distanceTraveled);
+                    }).OrderByDescending(result => result.Distance.Value).ToImmutableList();
                 });
-                creatures = results.Select(r => r.Creature).ToImmutableList();
                 GenerationDepthText.Text = $"{int.Parse(GenerationDepthText.Text) + 1}";
 
                 ListBoxCreatures = creatures;
-                CreatureList.ItemsSource = results.Select((creatureInfo, index) => $"Creature {index}; Distance: {creatureInfo.Distance}").ToArray();
+                CreatureList.ItemsSource = creatures.Select((creatureInfo, index) => $"Creature {index}; Distance: {creatureInfo.Distance}").ToArray();
             }
 
 
@@ -295,7 +298,7 @@ namespace HPCFinalProject
             var creature = ListBoxCreatures[CreatureList.SelectedIndex];
 
             // Now somehow show it on the thing!
-            (world, drawables, nodeBodies) = BuildWorld(creature);
+            (world, drawables, nodeBodies) = BuildWorld(creature.Creature);
         }
 
         private void SimulationTimeInput_TextChanged(object sender, TextChangedEventArgs e)
