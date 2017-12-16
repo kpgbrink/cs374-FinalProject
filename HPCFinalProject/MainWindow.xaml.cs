@@ -213,7 +213,13 @@ namespace HPCFinalProject
                     {
                         creatures = creatures.AddRange(Enumerable.Range(0, numPerGeneration).Select(j =>
                         {
-                            return (CreatureDefinition.CreateSeedCreature(), (float?)null);
+                            var seedCreature = CreatureDefinition.CreateSeedCreature();
+                            // Creature seed mutated
+                            for (var cre = 0; cre < 100; cre++)
+                            {
+                                seedCreature = seedCreature.GetMutatedCreature();
+                            }
+                            return (seedCreature, (float?)null);
                         }));
                     }
                     // Shortcut for respecting beParallel
@@ -239,7 +245,7 @@ namespace HPCFinalProject
                     {
                         if (creature.Distance.HasValue)
                         {
-                            creature.Distance *= .99f;
+                            creature.Distance *= 1f;
                             return creature;
                         }
                         var (world, drawables, bodies) = BuildWorld(creature.Creature);

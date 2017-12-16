@@ -163,24 +163,29 @@ namespace HPCFinalProject.Creature
                 }).ToImmutableList());
 
 
-            var nodeChance = 30.0f;
+            var nodeChance = 100.0f;
+            var nodeLoop = 100;
             // Delete nodes randomly
             {
-                var nodeCount = newCreature.Nodes.Count;
-                if (nodeCount > 1)
+                for (var i = 0; i < nodeLoop; i++)
                 {
-                    if (Random.NextFloat(0.0f, nodeChance/2) < 1f)
+                    var nodeCount = newCreature.Nodes.Count;
+                    if (nodeCount <= 1)
+                    {
+                        break;
+                    }
+                    if (Random.NextFloat(0.0f, nodeChance / 2) < 1f)
                     {
                         newCreature = newCreature.With(
                             nodes: newCreature.Nodes.RemoveAt(nodeCount - 1),
-                            joints: newCreature.Joints.Where(j => j.Node1Index != nodeCount - 1 && j.Node2Index != nodeCount -1).ToImmutableArray()
+                            joints: newCreature.Joints.Where(j => j.Node1Index != nodeCount - 1 && j.Node2Index != nodeCount - 1).ToImmutableArray()
                             );
                     }
                 }
             }
 
             // Add nodes randomly
-            for (var i = 0; i < 6; i++)
+            for (var i = 0; i < nodeLoop; i++)
             {
                 if (Random.NextFloat(0.0f, nodeChance) < 1.0f)
                 {
@@ -212,10 +217,11 @@ namespace HPCFinalProject.Creature
             }
 
 
-            var jointChance = 20.0f;
+            var jointChance = 100.0f;
+            var jointLoop = 100;
             // delete joints randomly
             {
-                for (var i = 0; i < 2; i++)
+                for (var i = 0; i < jointLoop; i++)
                 {
                     var jointCount = newCreature.Joints.Count;
                     if (jointCount > 1 && Random.NextFloat(0.0f, jointChance) < 1f)
@@ -241,7 +247,7 @@ namespace HPCFinalProject.Creature
             // add joints randomly
             {
                 var jointCount = newCreature.Joints.Count;
-                for (var i = 0; i < 5; i++)
+                for (var i = 0; i < jointLoop; i++)
                 {
                     jointCount = newCreature.Joints.Count;
                     var nodeCount = newCreature.Nodes.Count;
