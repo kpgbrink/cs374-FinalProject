@@ -1,24 +1,18 @@
-﻿using System;
+﻿using Box2DX.Collision;
+using Box2DX.Common;
+using Box2DX.Dynamics;
+using HPCFinalProject.Creature;
+using HPCFinalProject.Drawing;
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Box2DX.Dynamics;
-using Box2DX.Collision;
-using Box2DX.Common;
-using HPCFinalProject.Drawing;
-using HPCFinalProject.Creature;
-using System.Collections.Immutable;
 
 namespace HPCFinalProject
 {
@@ -40,6 +34,7 @@ namespace HPCFinalProject
         int imageWidth = 1920;
         int imageHeight = 1080;
         bool resetButtonClicked = false;
+        bool isRenderingSubscribed;
 
         IImmutableList<(CreatureDefinition Creature, float? Distance)> ListBoxCreatures = ImmutableArray<(CreatureDefinition, float?)>.Empty;
 
@@ -58,12 +53,30 @@ namespace HPCFinalProject
             //{
             //    creature = creature.GetMutatedCreature();
             //}
-            CompositionTarget.Rendering += CompositionTarget_Rendering;
+            SubscribeRendering();
         }
 
         void Window_Closed(object sender, EventArgs e)
         {
-            CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            UnsubscribeRendering();
+        }
+
+        void SubscribeRendering()
+        {
+            if (!isRenderingSubscribed)
+            {
+                isRenderingSubscribed = true;
+                CompositionTarget.Rendering += CompositionTarget_Rendering;
+            }
+        }
+
+        void UnsubscribeRendering()
+        {
+            if (isRenderingSubscribed)
+            {
+                isRenderingSubscribed = false;
+                CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            }
         }
 
         void CompositionTarget_Rendering(object sender, EventArgs e)
@@ -334,6 +347,22 @@ namespace HPCFinalProject
         private void SimulationTimeInput_TextChanged(object sender, TextChangedEventArgs e)
         {
 
+        }
+
+        private void RenderCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            // When unpacking the XAML, it triggers the Checked event—prior to the
+            // Loaded event. That ends up trying to access wb before it is initialized.
+            // So avoid that.
+            if (IsLoaded)
+            {
+                SubscribeRendering();
+            }
+        }
+
+        private void RenderCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            UnsubscribeRendering();
         }
     }
 }
