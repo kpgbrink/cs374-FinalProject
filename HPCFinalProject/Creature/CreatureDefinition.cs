@@ -13,8 +13,8 @@ namespace HPCFinalProject.Creature
         [ThreadStatic]
         static Random random;
         static Random Random => LazyInitializer.EnsureInitialized(ref random);
-        IImmutableList<NodeDefintion> Nodes { get; }
-        IImmutableList<JointDefinition> Joints { get; }
+        ImmutableList<NodeDefintion> Nodes { get; }
+        ImmutableList<JointDefinition> Joints { get; }
         const float height = 5.0f;
         const float width = 5.0f;
         internal const float radiusMin = 0.1f;
@@ -31,16 +31,16 @@ namespace HPCFinalProject.Creature
 
 
         public CreatureDefinition(
-            IImmutableList<NodeDefintion> nodes, 
-            IImmutableList<JointDefinition> joints)
+            ImmutableList<NodeDefintion> nodes, 
+            ImmutableList<JointDefinition> joints)
         {
             Nodes = nodes;
             Joints = joints;
         }
 
         public CreatureDefinition With(
-            IImmutableList<NodeDefintion> nodes = null,
-            IImmutableList<JointDefinition> joints = null)
+            ImmutableList<NodeDefintion> nodes = null,
+            ImmutableList<JointDefinition> joints = null)
             => new CreatureDefinition(
                 nodes ?? Nodes,
                 joints ?? Joints);
@@ -51,8 +51,8 @@ namespace HPCFinalProject.Creature
         /// <returns></returns>
         public static CreatureDefinition CreateSeedCreature()
         {
-            var nodes = ImmutableArray.Create(CreateNewNode(ImmutableArray<NodeDefintion>.Empty));
-            var constraints = ImmutableArray<JointDefinition>.Empty;
+            var nodes = ImmutableList.Create(CreateNewNode(ImmutableArray<NodeDefintion>.Empty));
+            var constraints = ImmutableList<JointDefinition>.Empty;
             return new CreatureDefinition(nodes, constraints);
         }
 
@@ -176,10 +176,7 @@ namespace HPCFinalProject.Creature
                     }
                     if (Random.NextFloat(0.0f, nodeChance / 2) < 1f)
                     {
-                        newCreature = newCreature.With(
-                            nodes: newCreature.Nodes.RemoveAt(nodeCount - 1),
-                            joints: newCreature.Joints.Where(j => j.Node1Index != nodeCount - 1 && j.Node2Index != nodeCount - 1).ToImmutableArray()
-                            );
+                        newCreature = newCreature.RemoveNode(Random.Next(nodeCount));
                     }
                 }
             }
@@ -241,7 +238,7 @@ namespace HPCFinalProject.Creature
                             lengthDelta: (joint.LengthDelta + Random.NextFloat(-.1f, .1f)).Inbetween(distanceAddMin, distanceAddMax),
                             motorInterval: (joint.MotorInterval + Random.NextFloat(-.1f, .1f)).Inbetween(distanceAddTimeMin, distanceAddTimeMax)
                             );
-                    }).ToImmutableArray());
+                    }).ToImmutableList());
             }
 
             // add joints randomly
@@ -283,8 +280,44 @@ namespace HPCFinalProject.Creature
                     var distanceBetweenTwoNodes = (node1.Pos - node2.Pos).Length();
 
                     return joint.With(length: distanceBetweenTwoNodes);
-                }).ToImmutableArray());
+                }).ToImmutableList());
             return newCreature;
+        }
+
+        public CreatureDefinition RemoveNode(
+            int index)
+        {
+            int? mapNodeIndex(int nodeIndex) => nodeIndex < index ? nodeIndex
+                : nodeIndex > index ? nodeIndex - 1
+                : (int?)null;
+            var jointsBuilder = Joints.ToBuilder();
+            for (var i = jointsBuilder.Count - 1; i >= 0; i--)
+            {
+                var joint = jointsBuilder[i];
+                var newNode1Index = mapNodeIndex(joint.Node1Index);
+                var newNode2Index = mapNodeIndex(joint.Node2Index);
+                if (newNode1Index.HasValue
+                    && newNode2Index.HasValue)
+                {
+                    // Update any joints referencing nodes after the removed
+                    // one to follow the shifted nodeds.
+                    if (newNode1Index != joint.Node1Index
+                        || newNode2Index != joint.Node2Index)
+                    {
+                        jointsBuilder[i] = joint.With(
+                            node1Index: newNode1Index,
+                            node2Index: newNode2Index);
+                    }
+                }
+                else
+                {
+                    // Remove any joint referencing the removed node
+                    jointsBuilder.RemoveAt(i);
+                }
+            }
+            return With(
+                nodes: Nodes.RemoveAt(index),
+                joints: jointsBuilder.ToImmutable());
         }
     }
 }
