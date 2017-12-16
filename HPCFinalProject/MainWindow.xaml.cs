@@ -223,14 +223,27 @@ namespace HPCFinalProject
                         }));
                     }
                     // Shortcut for respecting beParallel
-                    ParallelQuery<T> maybeParallel<T>(IEnumerable<T> enumerable) => (beParallel ? enumerable.AsParallel() : enumerable.AsParallel().WithDegreeOfParallelism(1));
+                    ParallelQuery<T> maybeParallel<T>(IEnumerable<T> enumerable, bool ordered = false)
+                    {
+                        var parallelQuery = enumerable.AsParallel();
+                        if (ordered)
+                        {
+                            // Must be called before WithDegreeOfParallelism().
+                            parallelQuery = parallelQuery.AsOrdered();
+                        }
+                        if (!beParallel)
+                        {
+                            parallelQuery = parallelQuery.WithDegreeOfParallelism(1);
+                        }
+                        return parallelQuery;
+                    }
                     // make children
                     while (creatures.Count < numPerGeneration)
                     {
                         // Ensure AsOrdered() because otherwise the fastest will win which might mean
                         // the things which roll the die a certain way resulting in always getting
                         // the same children somehow(?).
-                        var maybeParallelMakeCreatures = maybeParallel(creatures.ToArray()).AsOrdered();
+                        var maybeParallelMakeCreatures = maybeParallel(creatures.ToArray(), ordered: true);
                         foreach (var newCreature in maybeParallelMakeCreatures.Select(parent => (parent.Creature.GetMutatedCreature(), (float?)null) ))
                         {
                             creatures = creatures.Add(newCreature);
