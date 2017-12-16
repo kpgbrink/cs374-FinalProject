@@ -11,30 +11,30 @@
         >
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="160*"/>
-            <ColumnDefinition Width="51*"/>
-            <ColumnDefinition Width="271*"/>
+            <ColumnDefinition Width="109*"/>
+            <ColumnDefinition Width="202*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Image Margin="10.143,10,9.714,9.714" Name="image" Grid.Column="2" />
-        <Label Content="Generations:" Margin="79.857,12.429,200.714,0" Grid.Row="1" Grid.Column="2" Height="26" VerticalAlignment="Top"/>
-        <TextBox Name="GenerationsInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="155.857,16.429,0,0" Grid.Row="1" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="88"/>
-        <TextBox Name="NumSurvivePerGenerationInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="155.857,98.429,0,0" Grid.Row="1" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="88"/>
-        <TextBox Name="NumPerGenerationInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="155.857,72.429,0,0" Grid.Row="1" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="88"/>
-        <Button Name="StartButton" Content="Start" Grid.Column="2" Margin="254.857,15.429,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Start_Button_Click" HorizontalAlignment="Left" Width="77"/>
-        <Label Content="Generation Depth:" Grid.Column="2" HorizontalAlignment="Left" Margin="43.857,38.429,0,0" Grid.Row="1" VerticalAlignment="Top"/>
-        <TextBox Name="GenerationDepthText"  Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="155.857,40.429,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" IsReadOnly="True" Text="0"/>
-        <Label Content="# per generation:" Grid.Column="2" HorizontalAlignment="Left" Margin="43.857,68.429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="103"/>
-        <Label Content="# survive per generation:" Grid.Column="2" HorizontalAlignment="Left" Margin="10.143,94.286,0,0" Grid.Row="1" VerticalAlignment="Top"/>
-        <Label Content="Time to Calculate:" Grid.Column="2" HorizontalAlignment="Left" Margin="42.857,155.429,0,0" Grid.Row="1" VerticalAlignment="Top"/>
-        <TextBox Name="TimeToCalculateText" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="155.857,158.429,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" IsReadOnly="True"/>
-        <Label Content="Simulation Time(seconds):" Grid.Column="2" HorizontalAlignment="Left" Margin="9.857,124.429,0,0" Grid.Row="1" VerticalAlignment="Top"/>
-        <TextBox Name="SimulationTimeInput" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="155.857,127.429,0,0" Grid.Row="1" TextWrapping="Wrap" Text="20" VerticalAlignment="Top" Width="120" TextChanged="SimulationTimeInput_TextChanged"/>
-        <Button Content="Reset All" Grid.Column="2" HorizontalAlignment="Left" Margin="285.429,196.571,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="Reset_Button_Click"/>
-        <ListBox Name="CreatureList" SelectionChanged="ListBox_SelectionChanged" HorizontalAlignment="Left" Height="435" Margin="10,10,0,0" VerticalAlignment="Top" Width="269" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
-        <CheckBox Name="ParallelCheckBox" IsChecked="True" Content="Parallel" Grid.Column="2" HorizontalAlignment="Left" Margin="285.429,44.571,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+        <Image Margin="10" Name="image" Grid.Column="2" />
+        <Label Content="Generations:" Margin="80,12,201,0" Grid.Row="1" Grid.Column="2" Height="26" VerticalAlignment="Top"/>
+        <TextBox Name="GenerationsInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="156,16,0,0" Grid.Row="1" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="88"/>
+        <TextBox Name="NumSurvivePerGenerationInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="156,98,0,0" Grid.Row="1" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="88"/>
+        <TextBox Name="NumPerGenerationInput" Grid.Column="2" HorizontalAlignment="Left" Height="20" Margin="156,72,0,0" Grid.Row="1" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="88"/>
+        <Button Name="StartButton" Grid.Column="2" Margin="255,15,0,0" Grid.Row="1" VerticalAlignment="Top" Click="Start_Button_Click" HorizontalAlignment="Left" Width="77" Height="20" Content="Start"/>
+        <Label Content="Generation Depth:" Grid.Column="2" HorizontalAlignment="Left" Margin="44,38,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="107"/>
+        <TextBox Name="GenerationDepthText"  Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="156,40,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" IsReadOnly="True" Text="0"/>
+        <Label Content="# per generation:" Grid.Column="2" HorizontalAlignment="Left" Margin="44,68,0,0" Grid.Row="1" VerticalAlignment="Top" Width="103" Height="26"/>
+        <Label Content="# survive per generation:" Grid.Column="2" HorizontalAlignment="Left" Margin="10,94,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="141"/>
+        <Label Content="Time to Calculate:" Grid.Column="2" HorizontalAlignment="Left" Margin="43,155,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="104"/>
+        <TextBox Name="TimeToCalculateText" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="156,158,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" IsReadOnly="True"/>
+        <Label Content="Simulation Time(seconds):" Grid.Column="2" HorizontalAlignment="Left" Margin="10,124,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="148"/>
+        <TextBox Name="SimulationTimeInput" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="156,127,0,0" Grid.Row="1" TextWrapping="Wrap" Text="20" VerticalAlignment="Top" Width="120" TextChanged="SimulationTimeInput_TextChanged"/>
+        <Button Content="Reset All" Grid.Column="2" HorizontalAlignment="Left" Margin="285,197,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Click="Reset_Button_Click" Height="20"/>
+        <ListBox Name="CreatureList" SelectionChanged="ListBox_SelectionChanged" Height="435" Margin="10,10,10,0" VerticalAlignment="Top" Grid.RowSpan="2"/>
+        <Label Content="Max DOP" Grid.Column="2" HorizontalAlignment="Left" Margin="285,40,0,0" Grid.Row="1" VerticalAlignment="Top" Height="26" Width="60"/>
+        <TextBox Name="maxDopTextBox"  Grid.Column="1" HorizontalAlignment="Left" Height="23" Margin="350,44,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="66"/>
     </Grid>
 </Window>

@@ -200,7 +200,7 @@ namespace HPCFinalProject
             // Run the generations
             for (var i = 0; i < generations; i++)
             {
-                var beParallel = ParallelCheckBox.IsChecked ?? false;
+                int.TryParse(maxDopTextBox.Text, out var maxDop);
                 creatures = await Task.Run(async () =>
                 {
                     // Kill the weak
@@ -231,9 +231,9 @@ namespace HPCFinalProject
                             // Must be called before WithDegreeOfParallelism().
                             parallelQuery = parallelQuery.AsOrdered();
                         }
-                        if (!beParallel)
+                        if (maxDop > 0)
                         {
-                            parallelQuery = parallelQuery.WithDegreeOfParallelism(1);
+                            parallelQuery = parallelQuery.WithDegreeOfParallelism(maxDop);
                         }
                         return parallelQuery;
                     }
