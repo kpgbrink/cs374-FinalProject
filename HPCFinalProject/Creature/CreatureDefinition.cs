@@ -19,7 +19,7 @@ namespace HPCFinalProject.Creature
         const float width = 5.0f;
         internal const float radiusMin = 0.1f;
         internal const float radiusMax = 1f;
-        internal const float frictionMin = .001f;
+        internal const float frictionMin = .7f;
         internal const float frictionMax = 1f;
         internal const float densityMin = .001f;
         internal const float densityMax = 1f;
@@ -158,8 +158,8 @@ namespace HPCFinalProject.Creature
                         posX: node.PosX,
                         posY: node.PosY,
                         radius: node.Radius,
-                        friction: node.Friction + Random.NextFloat(-.2f, .2f).Inbetween(.01f, 1f),
-                        density: node.Density + Random.NextFloat(-.2f, .2f).Inbetween(.01f, 1f));
+                        friction: node.Friction + Random.NextFloat(-.1f, .1f).Inbetween(frictionMin, frictionMax),
+                        density: node.Density + Random.NextFloat(-.2f, .2f).Inbetween(densityMin, densityMax));
                 }).ToImmutableList());
 
 
